@@ -1,3 +1,10 @@
+# ToDo(Windows portig)
+1. Automate libpcap dependency resolution
+1. Modify libpcap library path(Currently, write directly to the source code..)
+1. Unittest
+
+***
+
 [![CircleCI](https://circleci.com/gh/ros-drivers/velodyne.svg?style=svg)](https://circleci.com/gh/ros-drivers/velodyne)
 
 Overview
