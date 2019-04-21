@@ -44,6 +44,11 @@
 
 #include "velodyne_driver/driver.h"
 
+#ifdef WIN32
+#pragma comment(lib, "WS2_32.lib")
+#pragma comment(lib, "C:/opt/rosdeps/x64/lib/pcap.lib")
+#endif
+
 namespace velodyne_driver
 {
 
@@ -204,7 +209,11 @@ bool VelodyneDriver::poll(void)
 
       // Extract base rotation of first block in packet
       std::size_t azimuth_data_pos = 100*0+2;
+#ifdef WIN32
+      int azimuth = *( (uint16_t*) (&tmp_packet.data[azimuth_data_pos]));
+#else
       int azimuth = *( (u_int16_t*) (&tmp_packet.data[azimuth_data_pos]));
+#endif
 
       //if first packet in scan, there is no "valid" last_azimuth_
       if (last_azimuth_ == -1) {

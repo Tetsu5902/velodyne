@@ -23,8 +23,19 @@ find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS} roslint)
 # This driver uses Boost threads
 find_package(Boost REQUIRED COMPONENTS thread)
 
+#message(STATUS "*** dump start cmake variables ***")
+#get_cmake_property(_variableNames VARIABLES)
+#foreach(_variableName ${_variableNames})
+#        message(STATUS "${_variableName}=${${_variableName}}")
+#endforeach()
+#message(STATUS "*** dump end ***")
+
 # libpcap provides no pkg-config or find_package module:
+if(WIN32)
+set(libpcap_LIBRARIES pcap)
+else()
 set(libpcap_LIBRARIES -lpcap)
+endif()
 
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 

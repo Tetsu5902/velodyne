@@ -4,7 +4,7 @@ add_dependencies(velodyne_node velodyne_driver_gencfg)
 target_link_libraries(velodyne_node
   velodyne_input
   ${catkin_LIBRARIES}
-  ${libpcap_LIBRARIES}
+#  ${libpcap_LIBRARIES}
 )
 
 # build the nodelet version
@@ -13,7 +13,7 @@ add_dependencies(driver_nodelet velodyne_driver_gencfg)
 target_link_libraries(driver_nodelet
   velodyne_input
   ${catkin_LIBRARIES}
-  ${libpcap_LIBRARIES}
+#  ${libpcap_LIBRARIES}
 )
 
 # install runtime files
@@ -21,6 +21,13 @@ install(TARGETS velodyne_node
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         COMPONENT main
 )
+
+if(WIN32)
+install(TARGETS driver_nodelet
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+else()
 install(TARGETS driver_nodelet
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
+endif()

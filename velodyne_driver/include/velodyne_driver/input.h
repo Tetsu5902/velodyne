@@ -53,10 +53,10 @@
 #ifndef VELODYNE_DRIVER_INPUT_H
 #define VELODYNE_DRIVER_INPUT_H
 
-#include <unistd.h>
+//#include <unistd.h>
 #include <stdio.h>
 #include <pcap.h>
-#include <netinet/in.h>
+//#include <netinet/in.h>
 #include <string>
 
 #include <ros/ros.h>

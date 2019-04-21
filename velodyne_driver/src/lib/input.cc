@@ -44,15 +44,23 @@
  *              PCAP dump
  */
 
-#include <unistd.h>
 #include <string>
 #include <sstream>
+
+#ifdef WIN32
+#include <winsock2.h>
+#include <WS2tcpip.h>
+#pragma comment(lib, "WS2_32.lib")
+#pragma comment(lib, "C:/opt/rosdeps/x64/lib/pcap.lib")
+#else
+#include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <poll.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/file.h>
+#endif
 #include <velodyne_driver/input.h>
 #include <velodyne_driver/time_conversion.hpp>
 
@@ -94,9 +102,12 @@ namespace velodyne_driver
     Input(private_nh, port)
   {
     sockfd_ = -1;
-    
     if (!devip_str_.empty()) {
+#ifdef WIN32
+       inet_pton(AF_INET, devip_str_.c_str(), &devip_.S_un.S_addr);
+#else
       inet_aton(devip_str_.c_str(),&devip_);
+#endif
     }    
 
     // connect to Velodyne UDP port
@@ -120,7 +131,12 @@ namespace velodyne_driver
         return;
       }
   
+#ifdef WIN32
+    u_long flag = 1;
+    if(ioctlsocket(sockfd_, FIONBIO, &flag) == SOCKET_ERROR)
+#else
     if (fcntl(sockfd_,F_SETFL, O_NONBLOCK|FASYNC) < 0)
+#endif
       {
         perror("non-block");
         return;
@@ -132,7 +148,11 @@ namespace velodyne_driver
   /** @brief destructor */
   InputSocket::~InputSocket(void)
   {
+#ifdef WIN32
+    closesocket(sockfd_);
+#else
     (void) close(sockfd_);
+#endif
   }
 
   /** @brief Get one velodyne packet. */
@@ -170,7 +190,11 @@ namespace velodyne_driver
         // poll() until input available
         do
           {
+#ifdef WIN32
+            int retval = WSAPoll(fds, 1, POLL_TIMEOUT);
+#else
             int retval = poll(fds, 1, POLL_TIMEOUT);
+#endif
             if (retval < 0)             // poll() error?
               {
                 if (errno != EINTR)
@@ -193,7 +217,13 @@ namespace velodyne_driver
 
         // Receive packets that should now be available from the
         // socket using a blocking read.
-        ssize_t nbytes = recvfrom(sockfd_, &pkt->data[0],
+#ifdef WIN32
+        SSIZE_T nbytes;
+#else
+        ssize_t nbytes
+#endif
+
+        nbytes = recvfrom(sockfd_, (char*)(&pkt->data[0]),
                                   packet_size,  0,
                                   (sockaddr*) &sender_address,
                                   &sender_address_len);
@@ -339,7 +369,11 @@ namespace velodyne_driver
           {
             ROS_INFO("end of file reached -- delaying %.3f seconds.",
                      repeat_delay_);
+#ifdef WIN32
+            Sleep(rint(repeat_delay_*1000.0));
+#else
             usleep(rint(repeat_delay_ * 1000000.0));
+#endif
           }
 
         ROS_DEBUG("replaying Velodyne dump file");
